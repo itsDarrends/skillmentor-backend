@@ -22,7 +22,7 @@ public class StudentServiceImpl implements StudentService {
     private final ModelMapper modelMapper;
 
     public Student createNewStudent(Student student) {
-        try {       
+        try {
             return studentRepository.save(student);
         } catch (DataIntegrityViolationException e) {
             log.error("Data integrity violation while creating student: {}", e.getMessage());

@@ -11,6 +11,7 @@ import com.stemlink.skillmentor.respositories.StudentRepository;
 import com.stemlink.skillmentor.respositories.MentorRepository;
 import com.stemlink.skillmentor.respositories.SubjectRepository;
 import com.stemlink.skillmentor.dto.SessionDTO;
+import com.stemlink.skillmentor.security.UserPrincipal;
 import com.stemlink.skillmentor.services.SessionService;
 import com.stemlink.skillmentor.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -40,7 +42,7 @@ public class SessionServiceImpl implements SessionService {
             Student student = studentRepository.findById(sessionDTO.getStudentId()).orElseThrow(
                     () -> new SkillMentorException("Student not found", HttpStatus.NOT_FOUND)
             );
-            Mentor mentor = mentorRepository.findById(sessionDTO.getMentorId()).orElseThrow(
+            Mentor mentor = mentorRepository.findByMentorId(String.valueOf(sessionDTO.getMentorId())).orElseThrow(
                     () -> new SkillMentorException("Mentor not found", HttpStatus.NOT_FOUND)
             );
             Subject subject = subjectRepository.findById(sessionDTO.getSubjectId()).orElseThrow(
@@ -100,7 +102,8 @@ public class SessionServiceImpl implements SessionService {
             session.setStudent(student);
         }
         if (updatedSessionDTO.getMentorId() != null) {
-            Mentor mentor = mentorRepository.findById(updatedSessionDTO.getMentorId()).get();
+            Mentor mentor = mentorRepository.findByMentorId(String.valueOf(updatedSessionDTO.getMentorId()))
+                    .orElseThrow(() -> new SkillMentorException("Mentor not found", HttpStatus.NOT_FOUND));
             session.setMentor(mentor);
         }
         if (updatedSessionDTO.getSubjectId() != null) {
@@ -136,6 +139,39 @@ public class SessionServiceImpl implements SessionService {
 
     public void deleteSession(Long id) {
         sessionRepository.deleteById(id);
+    }
+
+    public Session enrollSession(UserPrincipal userPrincipal, SessionDTO sessionDTO) {
+        // Find student by email from JWT, or auto-create user on first enrollment
+        Student student = studentRepository.findByEmail(userPrincipal.getEmail())
+                .orElseGet(() -> {
+                    Student s = new Student();
+                    s.setStudentId(userPrincipal.getId());
+                    s.setEmail(userPrincipal.getEmail());
+                    s.setFirstName(userPrincipal.getFirstName());
+                    s.setLastName(userPrincipal.getLastName());
+                    return studentRepository.save(s);
+                });
+
+        Mentor mentor = mentorRepository.findByMentorId(String.valueOf(sessionDTO.getMentorId()))
+                .orElseThrow(() -> new RuntimeException("Mentor not found with mentorId: " + sessionDTO.getMentorId()));
+        Subject subject = subjectRepository.findById(sessionDTO.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Subject not found with id: " + sessionDTO.getSubjectId()));
+
+        Session session = new Session();
+        session.setStudent(student);
+        session.setMentor(mentor);
+        session.setSubject(subject);
+        session.setSessionAt(sessionDTO.getSessionAt());
+        session.setDurationMinutes(sessionDTO.getDurationMinutes() != null ? sessionDTO.getDurationMinutes() : 60);
+        session.setSessionStatus("scheduled");
+        session.setPaymentStatus("pending");
+
+        return sessionRepository.save(session);
+    }
+
+    public List<Session> getSessionsByStudentEmail(String email) {
+        return sessionRepository.findByStudent_Email(email);
     }
 
 }

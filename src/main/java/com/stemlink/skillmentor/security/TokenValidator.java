@@ -1,4 +1,5 @@
 package com.stemlink.skillmentor.security;
+
 import java.util.List;
 
 public interface TokenValidator {

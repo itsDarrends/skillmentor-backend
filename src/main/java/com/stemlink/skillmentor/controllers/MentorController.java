@@ -15,15 +15,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 import static com.stemlink.skillmentor.constants.UserRoles.*;
 
 @RestController
 @RequestMapping(path = "/api/v1/mentors")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("isAuthenticated()")
 public class MentorController extends AbstractController {
 
     private final MentorService mentorService;
@@ -47,15 +44,21 @@ public class MentorController extends AbstractController {
     @PreAuthorize("hasAnyRole('" + ROLE_ADMIN + "', '" + ROLE_MENTOR + "')")
     public ResponseEntity<Mentor> createMentor(@Valid @RequestBody MentorDTO mentorDTO, Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-
         Mentor mentor = modelMapper.map(mentorDTO, Mentor.class);
-        mentor.setMentorId(userPrincipal.getId());
-        mentor.setFirstName(userPrincipal.getFirstName());
-        mentor.setLastName(userPrincipal.getLastName());
-        mentor.setEmail(userPrincipal.getEmail());
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            // MENTOR role → always use JWT claims for identity
+            mentor.setMentorId(userPrincipal.getId());
+            mentor.setFirstName(userPrincipal.getFirstName());
+            mentor.setLastName(userPrincipal.getLastName());
+            mentor.setEmail(userPrincipal.getEmail());
+        }
+        // ADMIN → ModelMapper already mapped body fields
 
         Mentor createdMentor = mentorService.createNewMentor(mentor);
-
         return sendCreatedResponse(createdMentor);
     }
 
@@ -65,7 +68,6 @@ public class MentorController extends AbstractController {
         Mentor mentor = modelMapper.map(updatedMentorDTO, Mentor.class);
         Mentor updatedMentor = mentorService.updateMentorById(id, mentor);
         return sendOkResponse(updatedMentor);
-
     }
 
     @DeleteMapping("{id}")

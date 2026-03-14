@@ -24,7 +24,7 @@ public class SubjectServiceImpl implements SubjectService {
     private final MentorRepository mentorRepository;
     private final ModelMapper modelMapper;
 
-    public List<Subject> getAllSubjects(){
+    public List<Subject> getAllSubjects() {
         try {
             return subjectRepository.findAll();
         } catch (Exception exception) {
@@ -33,9 +33,9 @@ public class SubjectServiceImpl implements SubjectService {
         }
     }
 
-    public Subject addNewSubject(Long mentorId, Subject subject){
+    public Subject addNewSubject(Long mentorId, Subject subject) {
         try {
-            Mentor mentor = mentorRepository.findById(mentorId).orElseThrow(
+            Mentor mentor = mentorRepository.findByMentorId(String.valueOf(mentorId)).orElseThrow(
                     () -> new SkillMentorException("Mentor not found", HttpStatus.NOT_FOUND)
             );
             subject.setMentor(mentor);
@@ -44,6 +44,9 @@ public class SubjectServiceImpl implements SubjectService {
             throw e;
         } catch (DataIntegrityViolationException e) {
             log.error("Data integrity violation while adding subject: {}", e.getMessage());
+            if (e.getMessage() != null && e.getMessage().contains("value too long")) {
+                throw new SkillMentorException("One or more fields exceed the maximum allowed length", HttpStatus.BAD_REQUEST);
+            }
             throw new SkillMentorException("Subject already exists or database constraint violation", HttpStatus.CONFLICT);
         } catch (Exception exception) {
             log.error("Failed to add new subject", exception);
@@ -51,13 +54,13 @@ public class SubjectServiceImpl implements SubjectService {
         }
     }
 
-    public Subject getSubjectById(Long id){
+    public Subject getSubjectById(Long id) {
         return subjectRepository.findById(id).orElseThrow(
                 () -> new SkillMentorException("Subject not found", HttpStatus.NOT_FOUND)
         );
     }
 
-    public Subject updateSubjectById(Long id, Subject updatedSubject){
+    public Subject updateSubjectById(Long id, Subject updatedSubject) {
         try {
             Subject subject = subjectRepository.findById(id).orElseThrow(
                     () -> new SkillMentorException("Subject not found", HttpStatus.NOT_FOUND)
@@ -75,7 +78,7 @@ public class SubjectServiceImpl implements SubjectService {
         }
     }
 
-    public void deleteSubject(Long id){
+    public void deleteSubject(Long id) {
         try {
             subjectRepository.deleteById(id);
         } catch (Exception exception) {

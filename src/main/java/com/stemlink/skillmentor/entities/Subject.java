@@ -1,6 +1,5 @@
 package com.stemlink.skillmentor.entities;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,13 +22,15 @@ public class Subject implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "subject_name", length = 20)
+    @Column(nullable = false, name = "subject_name", length = 255)
     private String subjectName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    // --------- Relationship -------------
+    @Column(name = "course_image_url", columnDefinition = "TEXT")
+    private String courseImageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentor_id", nullable = false)
     @JsonIgnore
