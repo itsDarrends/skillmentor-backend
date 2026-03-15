@@ -79,7 +79,7 @@ public class Mentor implements Serializable {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    @OneToMany(mappedBy = "mentor")
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Subject> subjects;
 
     @JsonIgnore
