@@ -22,8 +22,6 @@ public class ClerkValidator implements TokenValidator {
 
     public ClerkValidator(@Value("${clerk.jwks.url}") String clerkJwksUrl) {
         try {
-            // JwkProviderBuilder with caching to avoid hitting Clerk on every request
-            // Pass just the base domain - the library handles /.well-known/jwks.json automatically
             this.jwkProvider = new JwkProviderBuilder(new URL(clerkJwksUrl))
                     .cached(10, 24, TimeUnit.HOURS)
                     .rateLimited(10, 1, TimeUnit.MINUTES)
@@ -138,7 +136,10 @@ public class ClerkValidator implements TokenValidator {
             Jwk jwk = jwkProvider.get(kid);
             PublicKey publicKey = jwk.getPublicKey();
             Algorithm algorithm = Algorithm.RSA256((java.security.interfaces.RSAPublicKey) publicKey, null);
-            JWT.require(algorithm).build().verify(token);
+            JWT.require(algorithm)
+                    .acceptLeeway(60)
+                    .build()
+                    .verify(token);
             log.debug("Token signature verified successfully for kid: {}", kid);
             return true;
         } catch (Exception e) {
