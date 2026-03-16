@@ -35,7 +35,8 @@ public class SubjectServiceImpl implements SubjectService {
 
     public Subject addNewSubject(Long mentorId, Subject subject) {
         try {
-            Mentor mentor = mentorRepository.findByMentorId(String.valueOf(mentorId)).orElseThrow(
+            // Use findById (database id) instead of findByMentorId (Clerk string id)
+            Mentor mentor = mentorRepository.findById(mentorId).orElseThrow(
                     () -> new SkillMentorException("Mentor not found", HttpStatus.NOT_FOUND)
             );
             subject.setMentor(mentor);

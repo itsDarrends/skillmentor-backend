@@ -142,7 +142,6 @@ public class SessionServiceImpl implements SessionService {
     }
 
     public Session enrollSession(UserPrincipal userPrincipal, SessionDTO sessionDTO) {
-        // Find student by email from JWT, or auto-create user on first enrollment
         Student student = studentRepository.findByEmail(userPrincipal.getEmail())
                 .orElseGet(() -> {
                     Student s = new Student();
@@ -153,8 +152,9 @@ public class SessionServiceImpl implements SessionService {
                     return studentRepository.save(s);
                 });
 
-        Mentor mentor = mentorRepository.findByMentorId(String.valueOf(sessionDTO.getMentorId()))
-                .orElseThrow(() -> new RuntimeException("Mentor not found with mentorId: " + sessionDTO.getMentorId()));
+        // Use findById (database id) instead of findByMentorId
+        Mentor mentor = mentorRepository.findById(sessionDTO.getMentorId())
+                .orElseThrow(() -> new RuntimeException("Mentor not found with id: " + sessionDTO.getMentorId()));
         Subject subject = subjectRepository.findById(sessionDTO.getSubjectId())
                 .orElseThrow(() -> new RuntimeException("Subject not found with id: " + sessionDTO.getSubjectId()));
 
