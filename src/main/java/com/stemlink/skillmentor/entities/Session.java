@@ -1,6 +1,5 @@
 package com.stemlink.skillmentor.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,19 +23,16 @@ public class Session implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "student_id", nullable = false)
-    @JsonIgnore
     private Student student;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mentor_id", nullable = false)
-    @JsonIgnore
     private Mentor mentor;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "subject_id", nullable = false)
-    @JsonIgnore
     private Subject subject;
 
     @Column(name = "session_at", nullable = false)
