@@ -55,7 +55,6 @@ public class Mentor implements Serializable {
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
-    // Additional fields required for frontend mentor profile displays
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
@@ -79,11 +78,10 @@ public class Mentor implements Serializable {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "mentor", fetch = FetchType.EAGER)
     private List<Subject> subjects;
 
     @JsonIgnore
     @OneToMany(mappedBy = "mentor")
     private List<Session> sessions;
-
 }
