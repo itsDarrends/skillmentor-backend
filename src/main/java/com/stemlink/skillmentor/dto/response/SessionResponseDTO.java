@@ -1,7 +1,6 @@
 package com.stemlink.skillmentor.dto.response;
 
 import lombok.Data;
-
 import java.util.Date;
 
 @Data
@@ -15,4 +14,6 @@ public class SessionResponseDTO {
     private String sessionStatus;
     private String paymentStatus;
     private String meetingLink;
+    private String studentReview;
+    private Integer studentRating;
 }

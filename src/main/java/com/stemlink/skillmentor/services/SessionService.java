@@ -13,8 +13,7 @@ public interface SessionService {
     Session getSessionById(Long id);
     Session updateSessionById(Long id, SessionDTO updatedSessionDTO);
     void deleteSession(Long id);
-
-    // Frontend enrollment flow — student is resolved from the Clerk JWT
     Session enrollSession(UserPrincipal userPrincipal, SessionDTO sessionDTO);
     List<Session> getSessionsByStudentEmail(String email);
+    Session saveSession(Session session);
 }
