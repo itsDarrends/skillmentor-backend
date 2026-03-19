@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.stemlink.skillmentor.constants.UserRoles.*;
 
@@ -65,12 +66,20 @@ public class MentorController extends AbstractController {
                     return r;
                 }).toList();
 
+        // Per-subject enrollment counts
+        Map<Long, Long> subjectEnrollments = sessions.stream()
+                .collect(Collectors.groupingBy(
+                        s -> s.getSubject().getId(),
+                        Collectors.counting()
+                ));
+
         Map<String, Object> response = new HashMap<>();
         response.put("mentor", mentor);
         response.put("totalStudentsTaught", totalStudents);
         response.put("averageRating", Math.round(avgRating * 10.0) / 10.0);
         response.put("totalReviews", totalReviews);
         response.put("reviews", reviews);
+        response.put("subjectEnrollments", subjectEnrollments);
         return sendOkResponse(response);
     }
 
