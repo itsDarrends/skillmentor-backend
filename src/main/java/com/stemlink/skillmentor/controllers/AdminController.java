@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +68,10 @@ public class AdminController extends AbstractController {
         if (paymentStatus != null) session.setPaymentStatus(paymentStatus);
         String sessionStatus = body.get("sessionStatus");
         if (sessionStatus != null) session.setSessionStatus(sessionStatus);
+        // 👇 when marking complete, also set paymentStatus to completed
+        if ("completed".equals(sessionStatus)) {
+            session.setPaymentStatus("completed");
+        }
         return sendOkResponse(toAdminSessionDTO(sessionRepository.save(session)));
     }
 
@@ -138,6 +141,13 @@ public class AdminController extends AbstractController {
         if (body.get("subjectName") != null) subject.setSubjectName(body.get("subjectName"));
         if (body.get("description") != null) subject.setDescription(body.get("description"));
         if (body.get("courseImageUrl") != null) subject.setCourseImageUrl(body.get("courseImageUrl"));
+        // 👇 support changing mentor assignment
+        if (body.get("mentorId") != null) {
+            Long mentorId = Long.parseLong(body.get("mentorId"));
+            Mentor mentor = mentorRepository.findById(mentorId)
+                    .orElseThrow(() -> new RuntimeException("Mentor not found"));
+            subject.setMentor(mentor);
+        }
         return sendOkResponse(subjectRepository.save(subject));
     }
 

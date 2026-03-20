@@ -1,5 +1,6 @@
 package com.stemlink.skillmentor.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,7 +48,7 @@ public class Student implements Serializable {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    @JsonIgnore  // 👈 this was missing
     @OneToMany(mappedBy = "student")
     private List<Session> sessions;
-
 }
