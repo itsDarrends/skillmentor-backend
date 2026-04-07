@@ -44,7 +44,7 @@ public class MentorServiceImpl implements MentorService {
             if (name != null && !name.isEmpty()) {
                 return mentorRepository.findByName(name, pageable);
             }
-            return mentorRepository.findAll(pageable); // SELECT * FROM mentor
+            return mentorRepository.findAll(pageable); //SELECT * FROM mentor
         } catch (Exception exception) {
             log.error("Failed to get all mentors", exception);
             throw new SkillMentorException("Failed to get all mentors", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -62,10 +62,6 @@ public class MentorServiceImpl implements MentorService {
             log.info("Successfully fetched mentor {}", id);
             return mentor;
         } catch (SkillMentorException skillMentorException) {
-            //System.err.println("Mentor not found " + skillMentorException.getMessage());
-            // LOG LEVELS
-            // DEBUG, INFO, WARN, ERROR
-            // env - dev, prod
             log.warn("Mentor not found with id: {} to fetch", id, skillMentorException);
             throw new SkillMentorException("Mentor Not found", HttpStatus.NOT_FOUND);
         } catch (Exception exception) {

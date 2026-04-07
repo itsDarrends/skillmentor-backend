@@ -33,7 +33,7 @@ public class AdminController extends AbstractController {
     private final StudentRepository studentRepository;
     private final ModelMapper modelMapper;
 
-    // ─── STATISTICS ────────────────────────────────────────────────
+    //Statistics
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
         Map<String, Object> stats = new HashMap<>();
@@ -48,7 +48,7 @@ public class AdminController extends AbstractController {
         return sendOkResponse(stats);
     }
 
-    // ─── SESSIONS ──────────────────────────────────────────────────
+    //Sessions
     @GetMapping("/sessions")
     public ResponseEntity<List<AdminSessionResponseDTO>> getAllSessions() {
         List<Session> sessions = sessionRepository.findAll();
@@ -68,7 +68,8 @@ public class AdminController extends AbstractController {
         if (paymentStatus != null) session.setPaymentStatus(paymentStatus);
         String sessionStatus = body.get("sessionStatus");
         if (sessionStatus != null) session.setSessionStatus(sessionStatus);
-        // 👇 when marking complete, also set paymentStatus to completed
+
+        //marking complete
         if ("completed".equals(sessionStatus)) {
             session.setPaymentStatus("completed");
         }
@@ -91,7 +92,7 @@ public class AdminController extends AbstractController {
         return sendNoContentResponse();
     }
 
-    // ─── MENTORS ───────────────────────────────────────────────────
+    //Mentors
     @GetMapping("/mentors")
     public ResponseEntity<List<Mentor>> getAllMentors() {
         return sendOkResponse(mentorRepository.findAll());
@@ -126,7 +127,7 @@ public class AdminController extends AbstractController {
         return sendNoContentResponse();
     }
 
-    // ─── SUBJECTS ──────────────────────────────────────────────────
+    //Subjects
     @GetMapping("/subjects")
     public ResponseEntity<List<Subject>> getAllSubjects() {
         return sendOkResponse(subjectRepository.findAll());
@@ -141,7 +142,8 @@ public class AdminController extends AbstractController {
         if (body.get("subjectName") != null) subject.setSubjectName(body.get("subjectName"));
         if (body.get("description") != null) subject.setDescription(body.get("description"));
         if (body.get("courseImageUrl") != null) subject.setCourseImageUrl(body.get("courseImageUrl"));
-        // 👇 support changing mentor assignment
+
+        //Changing mentor
         if (body.get("mentorId") != null) {
             Long mentorId = Long.parseLong(body.get("mentorId"));
             Mentor mentor = mentorRepository.findById(mentorId)
@@ -157,7 +159,7 @@ public class AdminController extends AbstractController {
         return sendNoContentResponse();
     }
 
-    // ─── STUDENTS ──────────────────────────────────────────────────
+    //Students
     @GetMapping("/students")
     public ResponseEntity<List<Student>> getAllStudents() {
         return sendOkResponse(studentRepository.findAll());
@@ -169,7 +171,7 @@ public class AdminController extends AbstractController {
         return sendNoContentResponse();
     }
 
-    // ─── HELPER ────────────────────────────────────────────────────
+    //Helper
     private AdminSessionResponseDTO toAdminSessionDTO(Session session) {
         AdminSessionResponseDTO dto = new AdminSessionResponseDTO();
         dto.setId(session.getId());

@@ -48,7 +48,7 @@ public class Student implements Serializable {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    @JsonIgnore  // 👈 this was missing
+    @JsonIgnore
     @OneToMany(mappedBy = "student")
     private List<Session> sessions;
 }

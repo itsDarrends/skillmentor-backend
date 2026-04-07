@@ -1,6 +1,6 @@
 package com.stemlink.skillmentor.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,7 +33,7 @@ public class Subject implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentor_id", nullable = false)
-    @JsonIgnore
+    @JsonIgnoreProperties({"subjects", "sessions", "hibernateLazyInitializer"})
     private Mentor mentor;
 
     @CreationTimestamp

@@ -31,7 +31,7 @@ public class ValidationUtils {
             Date existingStart = existingSession.getSessionAt();
             Date existingEnd = addMinutesToDate(existingStart, existingSession.getDurationMinutes());
 
-            // Check for time overlap
+            //Check for time overlap
             if (isTimeOverlap(sessionAt, sessionEnd, existingStart, existingEnd)) {
                 throw new SkillMentorException("Mentor is not available at the requested time", HttpStatus.CONFLICT);
             }

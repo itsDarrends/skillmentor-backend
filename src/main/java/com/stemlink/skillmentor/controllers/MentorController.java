@@ -66,7 +66,7 @@ public class MentorController extends AbstractController {
                     return r;
                 }).toList();
 
-        // Per-subject enrollment counts
+        //Counts Per-subject enrollments
         Map<Long, Long> subjectEnrollments = sessions.stream()
                 .collect(Collectors.groupingBy(
                         s -> s.getSubject().getId(),
