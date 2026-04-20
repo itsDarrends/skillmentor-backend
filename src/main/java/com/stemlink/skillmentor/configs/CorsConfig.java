@@ -12,6 +12,7 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
+    //Reads allowed Origins from application.properties
     @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:8080}")
     private String allowedOrigins;
 

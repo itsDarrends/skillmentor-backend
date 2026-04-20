@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor //DI
 @Slf4j
 public class MentorServiceImpl implements MentorService {
 
