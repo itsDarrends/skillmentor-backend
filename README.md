@@ -1,234 +1,148 @@
-# SkillMentor - Online Mentoring Platform
+# SkillMentor Backend
 
-SkillMentor is a full-stack online mentoring platform that connects students with expert mentors for specialised subjects including AWS certifications, Microsoft Azure, DevOps, and more. Students can browse mentors, book one-on-one sessions, make payments, and track their learning progress through a personalised dashboard.
+A full-stack mentorship platform backend built with Spring Boot. Connects learners with mentors for skills-based learning with role-based access control and comprehensive error handling.
 
----
+## 🎯 Features
 
-## Features
+- **Role-Based Access Control** — Student and Mentor roles with distinct permissions
+- **Mentor Management** — Create, update, search mentors
+- **Enrollment System** — Students can enroll in mentorship sessions
+- **Double-Booking Prevention** — Validates time slot conflicts
+- **Date Range Filtering** — Query mentors/sessions by date
+- **Pagination & Sorting** — Efficient data retrieval
+- **Comprehensive Error Handling** — Custom exceptions with proper HTTP status codes
+- **API Documentation** — Swagger UI integration
 
-### Student Features
-- Browse available mentors and their subjects
-- View detailed mentor profiles with ratings and reviews
-- Book one-on-one sessions with preferred date and time
-- Upload bank transfer slip as payment proof
-- View enrolled sessions in personal dashboard
-- Track session status (pending, accepted, completed)
-- Write reviews for completed sessions
-- Double booking prevention
+## 🛠️ Tech Stack
 
-### Admin Features
-- View platform statistics (mentors, students, subjects, sessions)
-- Manage all bookings — confirm payments, mark sessions complete, add meeting links
-- Create and manage mentors with full profile information
-- Create and assign subjects to mentors
-- Manage students
-- Role-based access control via Clerk metadata
-
----
-
-## Tech Stack
-
-### Frontend
-- React 19 + TypeScript
-- Vite
-- Tailwind CSS v4
-- shadcn/ui components
-- React Router v7
-- React Hook Form + Zod validation
-- Clerk (authentication)
-
-### Backend
-- Spring Boot 3
-- Spring Security
-- Spring Data JPA / Hibernate
-- PostgreSQL
-- JWT validation via Clerk JWKS
-
-### Infrastructure
-- Frontend: Vercel
-- Backend: Render
-- Database: Supabase (PostgreSQL)
-- Authentication: Clerk
-
----
-
-## Getting Started (Local Development)
-
-### Prerequisites
-- Node.js 18+
-- Java 17+
-- Maven
-- PostgreSQL
-
-### Frontend Setup
-```bash
-# Clone the repository
-git clone https://github.com/itsDarrends/skillmentor-frontend.git
-cd skillmentor-frontend
-
-# Install dependencies
-npm install
-
-# Create environment file
-cp .env.example .env
-# Fill in the required environment variables (see below)
-
-# Start development server
-npm run dev
+```
+Spring Boot 3.x | Java 21 | Maven
+PostgreSQL | JPA/Hibernate
+Clerk OAuth2 | Spring Security
+Swagger UI | JUnit 5 | Mockito
 ```
 
-### Backend Setup
+## 📋 Database Schema
+
+### Mentors Table
+```sql
+CREATE TABLE mentors (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    subject VARCHAR(100) NOT NULL,
+    bio TEXT,
+    hourly_rate DECIMAL(10,2),
+    availability_start TIME,
+    availability_end TIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Enrollments Table
+```sql
+CREATE TABLE enrollments (
+    id SERIAL PRIMARY KEY,
+    student_id UUID NOT NULL,
+    mentor_id BIGINT NOT NULL REFERENCES mentors(id),
+    session_date DATE NOT NULL,
+    session_time TIME NOT NULL,
+    status VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_session UNIQUE(mentor_id, session_date, session_time)
+);
+```
+
+## 🚀 Getting Started
+
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/itsDarrends/skillmentor-backend.git
 cd skillmentor-backend
 
-# Update application.properties with your local DB credentials
+# Configure environment
+cp .env.example .env
+# Update DATABASE_URL, CLERK_SECRET_KEY
 
-# Run the application
-./mvnw spring-boot:run
+# Build and run
+mvn clean install
+mvn spring-boot:run
 ```
+
+Backend runs on `http://localhost:8080`
+
+## 📚 API Endpoints
+
+### Mentor Endpoints
+
+```
+GET    /api/mentors                      — List all mentors (paginated)
+GET    /api/mentors/{id}                 — Get mentor details
+POST   /api/mentors                      — Create new mentor (MENTOR role)
+PUT    /api/mentors/{id}                 — Update mentor (MENTOR role)
+DELETE /api/mentors/{id}                 — Delete mentor (MENTOR role)
+GET    /api/mentors/search?subject=Java  — Search mentors by subject
+GET    /api/mentors/available?date=2025-02-01  — Get available mentors
+```
+
+### Enrollment Endpoints
+
+```
+POST   /api/enrollments                  — Create enrollment (STUDENT role)
+GET    /api/enrollments/{id}             — Get enrollment details
+GET    /api/enrollments/user             — Get user's enrollments
+PUT    /api/enrollments/{id}             — Update enrollment status
+DELETE /api/enrollments/{id}             — Cancel enrollment
+```
+
+## 🔐 Security
+
+- **Role-Based Access:** `@PreAuthorize` annotations on endpoints
+- **JWT Authentication:** Clerk OAuth2 integration
+- **CORS:** Configured for frontend domain
+- **Input Validation:** `@Valid` with custom validators
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+mvn test
+
+# Run specific test class
+mvn test -Dtest=MentorServiceTest
+
+# With coverage report
+mvn test jacoco:report
+```
+
+## 📊 Error Handling
+
+Custom exception hierarchy:
+
+```java
+BusinessException (base)
+├── ResourceNotFoundException (404)
+├── InvalidEnrollmentException (400)
+├── TimeSlotUnavailableException (409)
+└── AuthorizationException (403)
+```
+
+## 🌐 Deployment
+
+**Render Configuration:**
+```
+Build: mvn clean install
+Start: java -jar target/skillmentor-backend.jar
+Env: DATABASE_URL, CLERK_SECRET_KEY
+```
+
+## 📝 License
+
+MIT License
+
+## 💬 Contact
+
+[itsdarrendsilva@gmail.com](mailto:itsdarrendsilva@gmail.com)
 
 ---
 
-## Environment Variables
-
-### Frontend (.env)
-```
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key
-VITE_API_BASE_URL=http://localhost:8081
-```
-
-### Backend (application.properties)
-```
-spring.datasource.url=jdbc:postgresql://localhost:5432/skill_mentor_v2
-spring.datasource.username=postgres
-spring.datasource.password=your_password
-clerk.jwks.url=https://your-clerk-instance.clerk.accounts.dev
-cors.allowed-origins=http://localhost:3001
-```
-
----
-
-## API Documentation
-
-### Public Endpoints (No Auth Required)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/mentors` | List all mentors with subjects |
-| GET | `/api/v1/mentors/{id}` | Get mentor profile with reviews and enrollment counts |
-| GET | `/api/public/health` | Health check |
-
-### Student Endpoints (Auth Required)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/sessions/enroll` | Create a new session booking |
-| GET | `/api/v1/sessions/my-sessions` | Get student's enrolled sessions |
-| PATCH | `/api/v1/sessions/{id}/review` | Submit a review for a completed session |
-| POST | `/api/v1/students` | Create student profile |
-| POST | `/api/v1/subjects` | Create a subject |
-
-### Admin Endpoints (Admin Role Required)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/admin/stats` | Get platform statistics |
-| GET | `/api/v1/admin/sessions` | Get all sessions |
-| PATCH | `/api/v1/admin/sessions/{id}/status` | Update session payment/status |
-| PATCH | `/api/v1/admin/sessions/{id}/meeting-link` | Add meeting link to session |
-| DELETE | `/api/v1/admin/sessions/{id}` | Delete a session |
-| GET | `/api/v1/admin/mentors` | Get all mentors |
-| PUT | `/api/v1/admin/mentors/{id}` | Update mentor |
-| DELETE | `/api/v1/admin/mentors/{id}` | Delete mentor |
-| GET | `/api/v1/admin/subjects` | Get all subjects |
-| PUT | `/api/v1/admin/subjects/{id}` | Update subject |
-| DELETE | `/api/v1/admin/subjects/{id}` | Delete subject |
-| GET | `/api/v1/admin/students` | Get all students |
-| DELETE | `/api/v1/admin/students/{id}` | Delete student |
-
----
-
-## Deployed Links
-
-- **Frontend:** https://skillmentor-frontend-alpha.vercel.app
-- **Backend Swagger:** https://skillmentor-backend-enr2.onrender.com/swagger-ui/index.html
-
----
-
-## Project Structure
-```
-skillmentor-frontend/
-├── src/
-│   ├── assets/              # Images and static files
-│   ├── components/          # Reusable components
-│   │   ├── ui/              # shadcn/ui components
-│   │   ├── Layout.tsx
-│   │   ├── Navigation.tsx
-│   │   ├── Footer.tsx
-│   │   ├── MentorCard.tsx
-│   │   ├── SchedulingModel.tsx
-│   │   ├── SignUpDialog.tsx
-│   │   └── StatusPill.tsx
-│   ├── lib/
-│   │   ├── api.ts           # API calls
-│   │   └── utils.ts
-│   ├── pages/
-│   │   ├── admin/           # Admin pages
-│   │   │   ├── AdminLayout.tsx
-│   │   │   ├── StatsPage.tsx
-│   │   │   ├── ManageBookingsPage.tsx
-│   │   │   ├── ManageMentorsPage.tsx
-│   │   │   ├── ManageSubjectsPage.tsx
-│   │   │   ├── ManageStudentsPage.tsx
-│   │   │   ├── CreateMentorPage.tsx
-│   │   │   └── CreateSubjectPage.tsx
-│   │   ├── HomePage.tsx
-│   │   ├── DashboardPage.tsx
-│   │   ├── MentorProfilePage.tsx
-│   │   ├── PaymentPage.tsx
-│   │   ├── LoginPage.tsx
-│   │   ├── AboutPage.tsx
-│   │   └── ResourcesPage.tsx
-│   ├── types.ts             # TypeScript interfaces
-│   ├── App.tsx              # Routes
-│   └── main.tsx
-
-skillmentor-backend/
-├── src/main/java/com/stemlink/skillmentor/
-│   ├── configs/             # Spring configurations
-│   ├── constants/           # Enums and constants
-│   ├── controllers/         # REST controllers
-│   ├── dto/                 # Data transfer objects
-│   ├── entities/            # JPA entities
-│   ├── exceptions/          # Custom exceptions
-│   ├── repositories/        # JPA repositories
-│   ├── security/            # Auth filters and validators
-│   ├── services/            # Business logic
-│   └── utils/               # Utility classes
-```
-
----
-
-## Authentication Setup (Clerk)
-
-1. Create a Clerk application at [clerk.com](https://clerk.com)
-2. Create a JWT template named `skillmentor-auth` with these claims:
-```json
-{
-  "email": "{{user.primary_email_address}}",
-  "roles": "{{user.public_metadata.roles}}",
-  "last_name": "{{user.last_name}}",
-  "first_name": "{{user.first_name}}"
-}
-```
-3. To create an admin user, set public metadata in Clerk dashboard:
-```json
-{
-  "roles": ["ADMIN"]
-}
-```
-
----
-
-## License
-
-This project was built as part of a full-stack development assignment.
+*Connecting learners with mentors* 🎓
